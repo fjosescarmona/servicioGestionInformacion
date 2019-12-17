@@ -1,5 +1,6 @@
 package com.everis.bc.infoManagerService.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import com.everis.bc.infoManagerService.model.CreditoTC;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteE;
 import com.everis.bc.infoManagerService.model.ProductDetails;
 import com.everis.bc.infoManagerService.model.ResponseDto;
+import com.everis.bc.infoManagerService.model.SaldosDto;
 import com.everis.bc.infoManagerService.service.InfoManagerService;
 
 import reactor.core.publisher.Flux;
@@ -33,6 +35,11 @@ public class InfoManagerController {
 	@GetMapping("/getClientEData/{doc}")
 	public Mono<ResponseDto> getClientEData(@PathVariable("doc") String doc){
 		return service.getDataByDocE(doc);
+	}
+	
+	@GetMapping("/getClientPSaldos/{doc}")
+	public Mono<List<SaldosDto>> getClientPSaldos(@PathVariable("doc") String doc){
+		return service.getSaldosByDocP(doc);
 	}
 
 }
