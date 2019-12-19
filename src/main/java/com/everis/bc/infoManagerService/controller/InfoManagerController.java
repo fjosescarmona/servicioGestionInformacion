@@ -1,5 +1,6 @@
 package com.everis.bc.infoManagerService.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everis.bc.infoManagerService.model.ComisionesDto;
 import com.everis.bc.infoManagerService.model.CreditoTC;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteE;
 import com.everis.bc.infoManagerService.model.ProductDetails;
@@ -40,6 +42,12 @@ public class InfoManagerController {
 	@GetMapping("/getClientPSaldos/{doc}")
 	public Mono<List<SaldosDto>> getClientPSaldos(@PathVariable("doc") String doc){
 		return service.getSaldosByDocP(doc);
+	}
+	
+	@GetMapping("/getClientComisiones/{nro_cuenta}/{from}/{to}")
+	public Mono<List<ComisionesDto>> getClientComisiones(@PathVariable("doc") String nro_cuenta, @PathVariable("from") String from, @PathVariable("to") String to){
+		
+		return service.getRangeComisionesByNro_cuenta(nro_cuenta, from, to);
 	}
 
 }

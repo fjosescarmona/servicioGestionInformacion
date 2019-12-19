@@ -1,6 +1,8 @@
 package com.everis.bc.infoManagerService.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +12,12 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.everis.bc.infoManagerService.model.ComisionesDto;
 import com.everis.bc.infoManagerService.model.CreditoTC;
 import com.everis.bc.infoManagerService.model.CuentaAhorro;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteE;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteP;
+import com.everis.bc.infoManagerService.model.Movimientos;
 import com.everis.bc.infoManagerService.model.ProductDetails;
 import com.everis.bc.infoManagerService.model.ResponseDto;
 import com.everis.bc.infoManagerService.model.SaldosDto;
@@ -224,5 +228,30 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 
 				});
 	}
+
+	@Override
+	public Mono<List<ComisionesDto>> getRangeComisionesByNro_cuenta(String nro_cuenta, String from, String to) {
+		// TODO Auto-generated method stub
+		List<ComisionesDto> response = new ArrayList<ComisionesDto>();
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("nro_cuenta", nro_cuenta);
+		params.put("from", from);
+		params.put("to", to);
+		
+		return client.get().uri("/corrientevip/getRangeMovimientosCorrienteVip/{nro_cuenta}/{from}/{to}", params)
+				.accept(MediaType.APPLICATION_JSON_UTF8).retrieve().bodyToFlux(Movimientos.class)
+				.collectList().flatMap(o -> {
+					ComisionesDto respuesta;
+					for (Movimientos h : o) {
+						respuesta = new ComisionesDto();
+						respuesta.setDescripcion(h.getDescripcion());
+						respuesta.setFecha(h.getFecha());
+						respuesta.setComision(h.getComision());
+						response.add(respuesta);
+					}
+					return Mono.just(response);
+				}).switchIfEmpty(Mono.just(response));
+	};
+	
 
 }
