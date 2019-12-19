@@ -13,6 +13,16 @@ public class ResponseDto {
 	private List<CuentaCorrienteE> cce;
 	
 	private CuentaCorrienteP ccp;
+	
+	private CuentaCorrienteVip ccvip;
+
+	public CuentaCorrienteVip getCcvip() {
+		return ccvip;
+	}
+
+	public void setCcvip(CuentaCorrienteVip ccvip) {
+		this.ccvip = ccvip;
+	}
 
 	public List<CreditoTC> getTc() {
 		return tc;

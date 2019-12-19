@@ -1,5 +1,6 @@
 package com.everis.bc.infoManagerService.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,9 +11,49 @@ public class AppConfig {
 	
 	@Value("${valores.uri_to_gateway}")
 	private String url;
+	@Value("${valores.uri_vip}")
+	private String vip;
+	@Value("${valores.uri_pcorriente}")
+	private String pcorriente;
+	@Value("${valores.uri_ecorriente}")
+	private String ecorriente;
+	@Value("${valores.uri_ahorro}")
+	private String ahorro;
+	@Value("${valores.uri_tc}")
+	private String tc;
 	
 	@Bean
+	@Qualifier("gateway")
 	public WebClient webClientRegister() {
 		return WebClient.create(url);
+	}
+	@Bean
+	@Qualifier("vip")
+	public WebClient webClientVip() {
+		return WebClient.create(vip);
+	}
+	
+	@Bean
+	@Qualifier("pcorriente")
+	public WebClient webClientPcorriente() {
+		return WebClient.create(pcorriente);
+	}
+	
+	@Bean
+	@Qualifier("ecorriente")
+	public WebClient webClientEcorriente() {
+		return WebClient.create(ecorriente);
+	}
+	
+	@Bean
+	@Qualifier("ahorro")
+	public WebClient webClientAhorro() {
+		return WebClient.create(ahorro);
+	}
+	
+	@Bean
+	@Qualifier("tc")
+	public WebClient webClientTc() {
+		return WebClient.create(tc);
 	}
 }

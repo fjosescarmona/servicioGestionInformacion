@@ -45,7 +45,7 @@ public class InfoManagerController {
 	}
 	
 	@GetMapping("/getClientComisiones/{nro_cuenta}/{from}/{to}")
-	public Mono<List<ComisionesDto>> getClientComisiones(@PathVariable("doc") String nro_cuenta, @PathVariable("from") String from, @PathVariable("to") String to){
+	public Mono<List<ComisionesDto>> getClientComisiones(@PathVariable("nro_cuenta") String nro_cuenta, @PathVariable("from") String from, @PathVariable("to") String to){
 		
 		return service.getRangeComisionesByNro_cuenta(nro_cuenta, from, to);
 	}

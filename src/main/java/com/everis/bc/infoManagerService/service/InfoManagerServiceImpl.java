@@ -1,13 +1,12 @@
 package com.everis.bc.infoManagerService.service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,13 +16,13 @@ import com.everis.bc.infoManagerService.model.CreditoTC;
 import com.everis.bc.infoManagerService.model.CuentaAhorro;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteE;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteP;
+import com.everis.bc.infoManagerService.model.CuentaCorrienteVip;
 import com.everis.bc.infoManagerService.model.Movimientos;
 import com.everis.bc.infoManagerService.model.ProductDetails;
 import com.everis.bc.infoManagerService.model.ResponseDto;
 import com.everis.bc.infoManagerService.model.SaldosDto;
 import com.everis.bc.infoManagerService.repository.Repo;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -31,9 +30,25 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 
 	// private WebClient client;
 	@Autowired
-	WebClient client;
+	@Qualifier("gateway")
+	private WebClient client;
 	@Autowired
 	private Repo repo1;
+	@Autowired
+	@Qualifier("vip")
+	private WebClient vip;
+	@Autowired
+	@Qualifier("pcorriente")
+	private WebClient pcorriente;
+	@Autowired
+	@Qualifier("ecorriente")
+	private WebClient ecorriente;
+	@Autowired
+	@Qualifier("ahorro")
+	private WebClient ahorro;
+	@Autowired
+	@Qualifier("tc")
+	private WebClient tc;
 
 	@Override
 	public Mono<ResponseDto> getDataByDocP(String doc) {
@@ -57,22 +72,39 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("doc", doc);
 
-		return client.get().uri("/ahorro/getCAhorroData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
-				.retrieve().bodyToMono(CuentaAhorro.class).flatMap(r -> {
+		return ahorro.get().uri("/getCAhorroData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+				.bodyToMono(CuentaAhorro.class).flatMap(r -> {
 					respuesta.setCa(r);
 					return Mono.just(respuesta);
 				}).switchIfEmpty(Mono.just(respuesta)).flatMap(p -> {
-					return client.get().uri("/tc/getTCData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
-							.retrieve().bodyToFlux(CreditoTC.class).collectList().flatMap(o -> {
+					return tc.get().uri("/getTCData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+							.bodyToFlux(CreditoTC.class).collectList().flatMap(o -> {
 								respuesta.setTc(o);
 								return Mono.just(respuesta);
 							}).switchIfEmpty(Mono.just(respuesta)).flatMap(d -> {
-								return client.get().uri("/pcorriente/getCcorrientePData/{doc}", params)
+								return pcorriente.get().uri("/getCcorrientePData/{doc}", params)
 										.accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
 										.bodyToMono(CuentaCorrienteP.class).flatMap(r -> {
 											respuesta.setCcp(r);
 											return Mono.just(respuesta);
-										}).switchIfEmpty(Mono.just(respuesta));
+										}).switchIfEmpty(Mono.just(respuesta)).flatMap(v -> {
+											return ecorriente.get().uri("/getCcorrienteEData/{doc}", params)
+													.accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+													.bodyToFlux(CuentaCorrienteE.class).collectList().flatMap(r -> {
+
+														respuesta.setCce(r);
+														return Mono.just(respuesta);
+													}).switchIfEmpty(Mono.just(respuesta)).flatMap(f->{
+														return vip.get().uri("/getCcorrienteVipData/{doc}", params)
+																.accept(MediaType.APPLICATION_JSON_UTF8)
+																.retrieve().bodyToMono(CuentaCorrienteVip.class)
+																.flatMap(r->{
+																	
+																	respuesta.setCcvip(r);
+																	return Mono.just(respuesta);
+																}).switchIfEmpty(Mono.just(respuesta));
+													});
+										});
 							});
 				});
 
@@ -104,7 +136,7 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 		params.put("doc", doc);
 		ResponseDto pd = new ResponseDto();
 
-		return client.get().uri("/ecorriente/getCcorrienteEData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
+		return ecorriente.get().uri("/getCcorrienteEData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
 				.retrieve().bodyToFlux(CuentaCorrienteE.class).collectList().flatMap(r -> {
 
 					pd.setCce(r);
@@ -168,7 +200,7 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("doc", doc);
 
-		return client.get().uri("/pcorriente/getCcorrientePData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
+		return pcorriente.get().uri("/getCcorrientePData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
 				.retrieve().bodyToMono(CuentaCorrienteP.class).flatMap(r -> {
 					SaldosDto respuesta = new SaldosDto();
 					respuesta.setNumero(r.getNro_cuenta());
@@ -177,9 +209,8 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 					response.add(respuesta);
 					return Mono.just(response);
 				}).switchIfEmpty(Mono.just(response)).flatMap(p -> {
-					return client.get().uri("/ahorro/getCAhorroData/{doc}", params)
-							.accept(MediaType.APPLICATION_JSON_UTF8).retrieve().bodyToMono(CuentaAhorro.class)
-							.flatMap(q -> {
+					return ahorro.get().uri("/getCAhorroData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
+							.retrieve().bodyToMono(CuentaAhorro.class).flatMap(q -> {
 								SaldosDto respuesta = new SaldosDto();
 								respuesta.setNumero(q.getNro_cuenta());
 								respuesta.setProducto("Cuenta Ahorro");
@@ -187,9 +218,8 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 								response.add(respuesta);
 								return Mono.just(response);
 							}).switchIfEmpty(Mono.just(response)).flatMap(m -> {
-								return client.get().uri("/tc/getTCData/{doc}", params)
-										.accept(MediaType.APPLICATION_JSON_UTF8).retrieve().bodyToFlux(CreditoTC.class)
-										.collectList().flatMap(o -> {
+								return tc.get().uri("/getTCData/{doc}", params).accept(MediaType.APPLICATION_JSON_UTF8)
+										.retrieve().bodyToFlux(CreditoTC.class).collectList().flatMap(o -> {
 											SaldosDto respuesta;
 											for (CreditoTC h : o) {
 												respuesta = new SaldosDto();
@@ -200,19 +230,21 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 											}
 
 											return Mono.just(response);
-										})/*
-											 * .switchIfEmpty(Mono.just(response)).flatMap(d -> { return
-											 * client.get().uri("/pcorriente/getCcorrienteVipData/{doc}", params)
-											 * .accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
-											 * .bodyToMono(CuentaCorrienteP.class).flatMap(n -> { SaldosDto
-											 * respuesta=new SaldosDto(); respuesta.setNumero(n.getNro_cuenta());
-											 * respuesta.setProducto(n.getTitulares().get(0).getProducto());
-											 * respuesta.setSaldo(n.getSaldo()); response.add(respuesta); return
-											 * Mono.just(response); }); })
-											 */.switchIfEmpty(Mono.just(response)).flatMap(d -> {
-											return client.get().uri("/ecorriente/getCcorrienteEData/{doc}", params)
-													.accept(MediaType.APPLICATION_JSON_UTF8).retrieve().bodyToFlux(CuentaCorrienteE.class)
-													.collectList().flatMap(o -> {
+										}).switchIfEmpty(Mono.just(response)).flatMap(d -> {
+											return vip.get().uri("/getCcorrienteVipData/{doc}", params)
+													.accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+													.bodyToMono(CuentaCorrienteP.class).flatMap(n -> {
+														SaldosDto respuesta = new SaldosDto();
+														respuesta.setNumero(n.getNro_cuenta());
+														respuesta.setProducto("Cuenta Corriente Vip");
+														respuesta.setSaldo(n.getSaldo());
+														response.add(respuesta);
+														return Mono.just(response);
+													});
+										}).switchIfEmpty(Mono.just(response)).flatMap(d -> {
+											return ecorriente.get().uri("/getCcorrienteEData/{doc}", params)
+													.accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+													.bodyToFlux(CuentaCorrienteE.class).collectList().flatMap(o -> {
 														SaldosDto respuesta;
 														for (CuentaCorrienteE h : o) {
 															respuesta = new SaldosDto();
@@ -237,21 +269,22 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 		params.put("nro_cuenta", nro_cuenta);
 		params.put("from", from);
 		params.put("to", to);
-		
-		return client.get().uri("/corrientevip/getRangeMovimientosCorrienteVip/{nro_cuenta}/{from}/{to}", params)
-				.accept(MediaType.APPLICATION_JSON_UTF8).retrieve().bodyToFlux(Movimientos.class)
-				.collectList().flatMap(o -> {
+
+		return vip.get().uri("/getRangeMovimientosCorrienteVip/{nro_cuenta}/{from}/{to}", params)
+				.accept(MediaType.APPLICATION_JSON_UTF8).retrieve().bodyToFlux(Movimientos.class).collectList()
+				.flatMap(o -> {
 					ComisionesDto respuesta;
 					for (Movimientos h : o) {
-						respuesta = new ComisionesDto();
-						respuesta.setDescripcion(h.getDescripcion());
-						respuesta.setFecha(h.getFecha());
-						respuesta.setComision(h.getComision());
-						response.add(respuesta);
+						if (h.getComision() > 0) {
+							respuesta = new ComisionesDto();
+							respuesta.setDescripcion(h.getDescripcion());
+							respuesta.setFecha(h.getFecha());
+							respuesta.setComision(h.getComision());
+							response.add(respuesta);
+						}
 					}
 					return Mono.just(response);
 				}).switchIfEmpty(Mono.just(response));
 	};
-	
 
 }
