@@ -94,12 +94,11 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 
 														respuesta.setCce(r);
 														return Mono.just(respuesta);
-													}).switchIfEmpty(Mono.just(respuesta)).flatMap(f->{
+													}).switchIfEmpty(Mono.just(respuesta)).flatMap(f -> {
 														return vip.get().uri("/getCcorrienteVipData/{doc}", params)
-																.accept(MediaType.APPLICATION_JSON_UTF8)
-																.retrieve().bodyToMono(CuentaCorrienteVip.class)
-																.flatMap(r->{
-																	
+																.accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+																.bodyToMono(CuentaCorrienteVip.class).flatMap(r -> {
+
 																	respuesta.setCcvip(r);
 																	return Mono.just(respuesta);
 																}).switchIfEmpty(Mono.just(respuesta));
@@ -284,7 +283,58 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 						}
 					}
 					return Mono.just(response);
-				}).switchIfEmpty(Mono.just(response));
+				}).switchIfEmpty(Mono.just(response)).flatMap(p -> {
+					return ahorro.get().uri("/getRangeMovimientosAhorro/{nro_cuenta}/{from}/{to}", params)
+							.accept(MediaType.APPLICATION_JSON_UTF8).retrieve().bodyToFlux(Movimientos.class)
+							.collectList().flatMap(o -> {
+								ComisionesDto respuesta;
+								for (Movimientos h : o) {
+									if (h.getComision() > 0) {
+										respuesta = new ComisionesDto();
+										respuesta.setDescripcion(h.getDescripcion());
+										respuesta.setFecha(h.getFecha());
+										respuesta.setComision(h.getComision());
+										response.add(respuesta);
+									}
+								}
+								return Mono.just(response);
+							}).switchIfEmpty(Mono.just(response)).flatMap(f -> {
+								return pcorriente.get()
+										.uri("/getRangeMovimientosPcorriente/{nro_cuenta}/{from}/{to}", params)
+										.accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+										.bodyToFlux(Movimientos.class).collectList().flatMap(o -> {
+											ComisionesDto respuesta;
+											for (Movimientos h : o) {
+												if (h.getComision() > 0) {
+													respuesta = new ComisionesDto();
+													respuesta.setDescripcion(h.getDescripcion());
+													respuesta.setFecha(h.getFecha());
+													respuesta.setComision(h.getComision());
+													response.add(respuesta);
+												}
+											}
+											return Mono.just(response);
+										}).switchIfEmpty(Mono.just(response)).flatMap(k -> {
+											return ecorriente.get()
+													.uri("/getRangeMovimientosEcorriente/{nro_cuenta}/{from}/{to}",
+															params)
+													.accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+													.bodyToFlux(Movimientos.class).collectList().flatMap(o -> {
+														ComisionesDto respuesta;
+														for (Movimientos h : o) {
+															if (h.getComision() > 0) {
+																respuesta = new ComisionesDto();
+																respuesta.setDescripcion(h.getDescripcion());
+																respuesta.setFecha(h.getFecha());
+																respuesta.setComision(h.getComision());
+																response.add(respuesta);
+															}
+														}
+														return Mono.just(response);
+													}).switchIfEmpty(Mono.just(response));
+										});
+							});
+				});
 	};
 
 }
