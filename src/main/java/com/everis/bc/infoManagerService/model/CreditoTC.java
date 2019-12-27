@@ -1,30 +1,85 @@
 package com.everis.bc.infoManagerService.model;
 
+import java.util.Date;
+
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
+
 
 public class CreditoTC {
 	@Id
 	private String id;
 	@NotNull
-	private String nro_tarjeta;
+	private String bankcode="";
 	@NotNull
-	private String tipo;
+	private String bank="";
 	@NotNull
-	private double saldo;
+	private String nro_tarjeta="";
 	@NotNull
-	private double limite;
+	private String tipo="";
 	@NotNull
-	private String name;
+	private double saldo=0.0;
 	@NotNull
-	private String lastname;
+	private double limite=0.0;
 	@NotNull
-	private String doc;
+	private String name="";
 	@NotNull
-	private String producto;
+	private String lastname="";
+	@NotNull
+	private String doc="";
+	@NotNull
+	private String producto="";
+	@NotNull
+	private double minimo=0.0;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date fechaPago;
+	@NotNull
+	private String estadoPago;
 	
+	
+	public String getEstadoPago() {
+		return estadoPago;
+	}
+
+	public void setEstadoPago(String estadoPago) {
+		this.estadoPago = estadoPago;
+	}
+
+	public double getMinimo() {
+		return minimo;
+	}
+
+	public void setMinimo(double minimo) {
+		this.minimo = minimo;
+	}
+
+	public Date getFechaPago() {
+		return fechaPago;
+	}
+
+	public void setFechaPago(Date fechaPago) {
+		this.fechaPago = fechaPago;
+	}
+
+	public String getBankcode() {
+		return bankcode;
+	}
+
+	public void setBankcode(String bankcode) {
+		this.bankcode = bankcode;
+	}
+
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
+
 	public String getName() {
 		return name;
 	}

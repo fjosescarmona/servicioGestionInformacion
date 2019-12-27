@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everis.bc.infoManagerService.model.ComisionesDto;
 import com.everis.bc.infoManagerService.model.CreditoTC;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteE;
+import com.everis.bc.infoManagerService.model.Deudores;
 import com.everis.bc.infoManagerService.model.ProductDetails;
 import com.everis.bc.infoManagerService.model.ResponseDto;
 import com.everis.bc.infoManagerService.model.SaldosDto;
@@ -48,6 +49,18 @@ public class InfoManagerController {
 	public Mono<List<ComisionesDto>> getClientComisiones(@PathVariable("nro_cuenta") String nro_cuenta, @PathVariable("from") String from, @PathVariable("to") String to){
 		
 		return service.getRangeComisionesByNro_cuenta(nro_cuenta, from, to);
+	}
+	
+	@GetMapping("/getDeudores")
+	public Flux<Deudores> getDeudores(){
+		
+		return service.getDeudores();
+	}
+	
+	@GetMapping("/getDeudoresDoc/{docs}")
+	public Flux<Deudores> getDeudoresDoc(@PathVariable("docs") List<String> docs){
+		
+		return service.getDeudoresDoc(docs);
 	}
 
 }

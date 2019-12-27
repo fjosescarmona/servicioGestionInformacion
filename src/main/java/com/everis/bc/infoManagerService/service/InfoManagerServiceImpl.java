@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.everis.bc.infoManagerService.model.ComisionesDto;
@@ -17,12 +18,14 @@ import com.everis.bc.infoManagerService.model.CuentaAhorro;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteE;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteP;
 import com.everis.bc.infoManagerService.model.CuentaCorrienteVip;
+import com.everis.bc.infoManagerService.model.Deudores;
 import com.everis.bc.infoManagerService.model.Movimientos;
 import com.everis.bc.infoManagerService.model.ProductDetails;
 import com.everis.bc.infoManagerService.model.ResponseDto;
 import com.everis.bc.infoManagerService.model.SaldosDto;
 import com.everis.bc.infoManagerService.repository.Repo;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -52,21 +55,6 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 
 	@Override
 	public Mono<ResponseDto> getDataByDocP(String doc) {
-		// TODO Auto-generated method stub
-		// Map<String, Object> respuesta = new HashMap<String, Object>();
-		List<CreditoTC> tdc = new ArrayList<CreditoTC>();
-		// CreditoTC tdc1=new CreditoTC();
-		// tdc.add(tdc1);
-		CuentaCorrienteP cc = new CuentaCorrienteP();
-		CuentaAhorro ca = new CuentaAhorro();
-		// Mono<CuentaCorrienteP> cc2;
-		ProductDetails pd = new ProductDetails();
-
-		pd.setDoc(doc);
-		pd.setCcp(cc);
-		pd.setTc(tdc);
-		pd.setCa(ca);
-		repo1.save(pd).subscribe();
 
 		ResponseDto respuesta = new ResponseDto();
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -157,38 +145,6 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 		 * repo1.findByDoc(doc).flatMap(r -> { repo1.delete(r).subscribe(); return
 		 * Mono.just(r); }); });
 		 */
-
-	}
-
-	public Mono<ProductDetails> updateca(String doc, CuentaAhorro ca) {
-		return repo1.findByDoc(doc).flatMap(r -> {
-			r.setCa(ca);
-			return repo1.save(r);
-		});
-
-	}
-
-	public Mono<ProductDetails> updatetc(String doc, List<CreditoTC> tc) {
-		return repo1.findByDoc(doc).flatMap(r -> {
-			r.setTc(tc);
-			return repo1.save(r);
-		});
-
-	}
-
-	public Mono<ProductDetails> updatecc(String doc, CuentaCorrienteP cc) {
-		return repo1.findByDoc(doc).flatMap(r -> {
-			r.setCcp(cc);
-			return repo1.save(r);
-		});
-
-	}
-
-	public Mono<ProductDetails> updatecce(String doc, List<CuentaCorrienteE> cce) {
-		return repo1.findByDoc(doc).flatMap(r -> {
-			r.setCce(cce);
-			return repo1.save(r);
-		});
 
 	}
 
@@ -335,6 +291,68 @@ public class InfoManagerServiceImpl implements InfoManagerService {
 										});
 							});
 				});
-	};
+	}
+
+	@Override
+	public Flux<Deudores> getDeudores() {
+		// TODO Auto-generated method stub
+		List<Deudores> response = new ArrayList<Deudores>();
+		return tc.get().uri("/getDeudaVencida").accept(MediaType.APPLICATION_JSON_UTF8).retrieve()
+				.bodyToFlux(CreditoTC.class).collectList().flatMapMany(o -> {
+
+					Deudores respuesta;
+					for (CreditoTC h : o) {
+						respuesta = new Deudores();
+						respuesta.setDocumento(h.getDoc());
+						respuesta.setName(h.getName());
+						respuesta.setLastname(h.getLastname());
+						respuesta.setDeuda(h.getMinimo());
+						response.add(respuesta);
+					}
+					return repo1.saveAll(response);
+				}).flatMap(d -> {
+					return tc.post().uri("/saveDeudoresTC").accept(MediaType.APPLICATION_JSON_UTF8)
+							.body(BodyInserters.fromObject(response)).retrieve().bodyToFlux(Deudores.class)
+							.flatMap(ptdc -> {
+								return Flux.just(ptdc);
+							}).flatMap(m -> {
+								return pcorriente.post().uri("/saveDeudoresPcorriente")
+										.accept(MediaType.APPLICATION_JSON_UTF8)
+										.body(BodyInserters.fromObject(response)).retrieve().bodyToFlux(Deudores.class)
+										.flatMap(ptdc -> {
+											return Flux.just(ptdc);
+										}).flatMap(n -> {
+											return ecorriente.post().uri("/saveDeudoresEcorriente")
+													.accept(MediaType.APPLICATION_JSON_UTF8)
+													.body(BodyInserters.fromObject(response)).retrieve()
+													.bodyToFlux(Deudores.class).flatMap(ptdc -> {
+														return Flux.just(ptdc);
+													}).flatMap(j -> {
+														return ahorro.post().uri("/saveDeudoresAhorro")
+																.accept(MediaType.APPLICATION_JSON_UTF8)
+																.body(BodyInserters.fromObject(response)).retrieve()
+																.bodyToFlux(Deudores.class).flatMap(ptdc -> {
+																	return Flux.just(ptdc);
+																}).flatMap(k -> {
+																	return vip.post().uri("/saveDeudoresVip")
+																			.accept(MediaType.APPLICATION_JSON_UTF8)
+																			.body(BodyInserters.fromObject(response))
+																			.retrieve().bodyToFlux(Deudores.class)
+																			.flatMap(ptdc -> {
+																				return Flux.just(ptdc);
+																			});
+																});
+													});
+										});
+							});
+				});
+	}
+
+	@Override
+	public Flux<Deudores> getDeudoresDoc(List<String> docs) {
+
+		return repo1.findByDocumentoList(docs);
+
+	}
 
 }
