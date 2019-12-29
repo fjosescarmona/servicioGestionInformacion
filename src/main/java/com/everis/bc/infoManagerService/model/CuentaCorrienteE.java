@@ -1,25 +1,84 @@
 package com.everis.bc.infoManagerService.model;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
+
 
 public class CuentaCorrienteE {
 	@Id
 	private String id;
 	@NotNull
-	private String nro_cuenta;
+	private String bankcode="";
 	@NotNull
-	private String tipo;
+	private String bank="";
 	@NotNull
-	private double saldo;
+	private String nro_cuenta="";
+	@NotNull
+	private String tipo="";
+	@NotNull
+	private double saldo= 0.0;
+	@NotNull
+	private int movesxmonth;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date lastmove;
 	
-	private List<Empresa> titulares;
+	private List<Listas> titulares;
 	
 	private List<Persona> firmantes;
+	
+	public String getBankcode() {
+		return bankcode;
+	}
+
+	public void setBankcode(String bankcode) {
+		this.bankcode = bankcode;
+	}
+
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
+
+	public int getMovesxmonth() {
+		return movesxmonth;
+	}
+
+	public void setMovesxmonth(int movesxmonth) {
+		this.movesxmonth = movesxmonth;
+	}
+
+	public Date getLastmove() {
+		return lastmove;
+	}
+
+	public void setLastmove(Date lastmove) {
+		this.lastmove = lastmove;
+	}
+
+	public List<Persona> getFirmantes() {
+		return firmantes;
+	}
+
+	public void setFirmantes(List<Persona> firmantes) {
+		this.firmantes = firmantes;
+	}
+
+	public String getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
 
 	public String getId() {
 		return id;
@@ -37,14 +96,6 @@ public class CuentaCorrienteE {
 		this.nro_cuenta = nro_cuenta;
 	}
 
-	public String getTipo() {
-		return tipo;
-	}
-
-	public void setTipo(String tipo) {
-		this.tipo = tipo;
-	}
-
 	public double getSaldo() {
 		return saldo;
 	}
@@ -53,21 +104,12 @@ public class CuentaCorrienteE {
 		this.saldo = saldo;
 	}
 
-	public List<Empresa> getTitulares() {
+	public List<Listas> getTitulares() {
 		return titulares;
 	}
 
-	public void setTitulares(List<Empresa> titulares) {
+	public void setTitulares(List<Listas> titulares) {
 		this.titulares = titulares;
 	}
 
-	public List<Persona> getFirmantes() {
-		return firmantes;
-	}
-
-	public void setFirmantes(List<Persona> firmantes) {
-		this.firmantes = firmantes;
-	}
-	
-	
 }

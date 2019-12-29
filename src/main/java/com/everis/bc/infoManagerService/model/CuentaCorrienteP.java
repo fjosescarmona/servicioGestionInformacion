@@ -1,25 +1,69 @@
 package com.everis.bc.infoManagerService.model;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
+
 
 public class CuentaCorrienteP {
 	@Id
-	private String id="";
+	private String id;
 	@NotNull
-	private String nro_cuenta="";
+	private String bankcode;
 	@NotNull
-	private String tipo="";
+	private String bank;
 	@NotNull
-	private double saldo=0.0;
+	private String nro_cuenta;
+	@NotNull
+	private String tipo;
+	@NotNull
+	private double saldo;
+	@NotNull
+	private int movesxmonth;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date lastmove;
 	
 	private List<Listas> titulares;
 	
 	private List<Listas> firmantes;
 	
+	public String getBankcode() {
+		return bankcode;
+	}
+
+	public void setBankcode(String bankcode) {
+		this.bankcode = bankcode;
+	}
+
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
+
+	public int getMovesxmonth() {
+		return movesxmonth;
+	}
+
+	public void setMovesxmonth(int movesxmonth) {
+		this.movesxmonth = movesxmonth;
+	}
+
+	public Date getLastmove() {
+		return lastmove;
+	}
+
+	public void setLastmove(Date lastmove) {
+		this.lastmove = lastmove;
+	}
+
 	public String getTipo() {
 		return tipo;
 	}

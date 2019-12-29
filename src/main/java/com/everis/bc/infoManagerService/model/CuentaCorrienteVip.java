@@ -9,10 +9,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
-@Document(collection="c_ccorriente")
+
 public class CuentaCorrienteVip {
 	@Id
 	private String id;
+	@NotNull
+	private String bankcode="";
+	@NotNull
+	private String bank="";
 	@NotNull
 	private String nro_cuenta="";
 	@NotNull
@@ -24,9 +28,25 @@ public class CuentaCorrienteVip {
 	
 	private List<Listas> firmantes;
 	@NotNull
-	private int movesxmonth=5;
+	private int movesxmonth;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date lastmove;
+
+	public String getBankcode() {
+		return bankcode;
+	}
+
+	public void setBankcode(String bankcode) {
+		this.bankcode = bankcode;
+	}
+
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
 
 	public int getMovesxmonth() {
 		return movesxmonth;

@@ -8,19 +8,19 @@ public class ResponseDto {
 	
 	private List<CreditoTC> tc;
 	
-	private CuentaAhorro ca;
+	private List<CuentaAhorro> ca;
 	
 	private List<CuentaCorrienteE> cce;
 	
-	private CuentaCorrienteP ccp;
+	private List<CuentaCorrienteP> ccp;
 	
-	private CuentaCorrienteVip ccvip;
+	private List<CuentaCorrienteVip> ccvip;
 
-	public CuentaCorrienteVip getCcvip() {
+	public List<CuentaCorrienteVip> getCcvip() {
 		return ccvip;
 	}
 
-	public void setCcvip(CuentaCorrienteVip ccvip) {
+	public void setCcvip(List<CuentaCorrienteVip> ccvip) {
 		this.ccvip = ccvip;
 	}
 
@@ -32,11 +32,11 @@ public class ResponseDto {
 		this.tc = tc;
 	}
 
-	public CuentaAhorro getCa() {
+	public List<CuentaAhorro> getCa() {
 		return ca;
 	}
 
-	public void setCa(CuentaAhorro ca) {
+	public void setCa(List<CuentaAhorro> ca) {
 		this.ca = ca;
 	}
 
@@ -48,11 +48,11 @@ public class ResponseDto {
 		this.cce = cce;
 	}
 
-	public CuentaCorrienteP getCcp() {
+	public List<CuentaCorrienteP> getCcp() {
 		return ccp;
 	}
 
-	public void setCcp(CuentaCorrienteP ccp) {
+	public void setCcp(List<CuentaCorrienteP> ccp) {
 		this.ccp = ccp;
 	}
 }

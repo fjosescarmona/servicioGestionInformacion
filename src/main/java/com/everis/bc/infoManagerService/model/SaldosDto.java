@@ -1,12 +1,22 @@
 package com.everis.bc.infoManagerService.model;
 
 public class SaldosDto {
+	
+	private String banco;
 
 	private String producto;
 	
 	private String numero;
 	
 	private double saldo;
+
+	public String getBanco() {
+		return banco;
+	}
+
+	public void setBanco(String banco) {
+		this.banco = banco;
+	}
 
 	public String getProducto() {
 		return producto;
